@@ -1,8 +1,5 @@
 package fr.xebia.xke.fp5.serialization.helper
 
-import org.scalatest.Assertions
-import org.scalatest.exceptions.TestFailedException
-
 import scalaz.{Failure, Success, Validation}
 
 object ValidationHelper {

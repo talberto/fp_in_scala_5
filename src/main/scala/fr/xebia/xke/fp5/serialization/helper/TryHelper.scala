@@ -10,6 +10,7 @@ import scalaz.{@@, Validation}
 object TryHelper {
 
   implicit class RichTry[T](tryy: Try[T]) {
+
     def toEither: Either[SerializationError, T] =
       tryy match {
         case util.Success(r) => util.Right(r)
@@ -18,6 +19,7 @@ object TryHelper {
 
     def toValidation: Validation[SerializationError, T] =
       Validation.fromEither(tryy.toEither)
+
   }
 
 }

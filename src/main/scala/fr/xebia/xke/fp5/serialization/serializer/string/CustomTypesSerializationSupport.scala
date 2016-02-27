@@ -9,19 +9,17 @@ import scalaz.{Failure, Success, Validation}
 
 object CustomTypesSerializationSupport {
 
-  implicit object PersonSerializationSupport extends Serializable[Person, String] {
+  implicit object PersonSerializationSupport extends Serializable[Person] {
 
     val PersonPattern = """Person\((.*),(.*),(.*)\)""".r
 
-    override def deserialize(u: String): Validation[SerializationError, Person] = u match {
-      case _ if PersonPattern.findFirstMatchIn(u).isDefined =>
-        val matchingGroups = PersonPattern.findFirstMatchIn(u).get.subgroups
-
+    override def deserialize(s: String): Validation[SerializationError, Person] = s match {
+      case PersonPattern(eventualFirstName, eventualLastName, eventualMail) =>
         for {
-          foo <- Serializer.read[String, String](matchingGroups(0).toString)
-          bar <- Serializer.read[String, String](matchingGroups(1).toString)
-          mail <- Serializer.read[Option[String], String](matchingGroups(2).toString)
-        } yield Person(foo, bar, mail)
+          firstName <- Serializer.read[String](eventualFirstName)
+          lastName <- Serializer.read[String](eventualLastName)
+          mail <- Serializer.read[Option[String]](eventualMail)
+        } yield Person(firstName, lastName, mail)
 
       case _ => Failure("Expected Person")
     }
@@ -30,23 +28,5 @@ object CustomTypesSerializationSupport {
       Success(t.toString)
 
   }
-
-
-  implicit def eitherSerializationSupport[A, B](implicit evA: Serializable[A, String], evB: Serializable[B, String]) =
-    new Serializable[Either[A, B], String] {
-
-      val RightPattern = """Right\((.*)\)""".r
-      val LeftPattern = """Left\((.*)\)""".r
-
-      override def deserialize(u: String): Validation[SerializationError, Either[A, B]] = u match {
-        case RightPattern(right) => Serializer.read[B, String](right).map(right => Right(right))
-        case LeftPattern(left) => Serializer.read[A, String](left).map(left => Left(left))
-        case _ => Failure("Expected Either")
-      }
-
-      override def serialize(t: Either[A, B]): Validation[SerializationError, String] =
-        Success(t.toString)
-
-    }
 
 }

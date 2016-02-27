@@ -8,7 +8,7 @@ import fr.xebia.xke.fp5.serialization.serializer.string.CustomTypesSerialization
 import fr.xebia.xke.fp5.serialization.serializer.string.StandardTypeSerializationSupport._
 import org.scalatest.{Assertions, FlatSpec, Matchers}
 
-class SerializerSpec extends FlatSpec with Matchers with Assertions {
+class StringSerializerSpec extends FlatSpec with Matchers with Assertions {
 
   "Serializable" should "serialize Booleans" in {
     write(true).value should equal("true")
@@ -16,20 +16,21 @@ class SerializerSpec extends FlatSpec with Matchers with Assertions {
   }
 
   it should "deserialize Booleans" in {
-    read[Boolean, String]("true").value should equal(true)
-    read[Boolean, String]("false").value should equal(false)
+    read[Boolean]("true").value should equal(true)
+    read[Boolean]("false").value should equal(false)
   }
 
   it should "fail for invalid Boolean read" in {
-    read[Boolean, String]("maybe ?").isFailure should be(true)
+    read[Boolean]("maybe ?").isFailure should be(true)
   }
 
   it should "serialize Strings" in {
-    write("Hello world !").value should equal("Hello world !")
+    write("Hello world !").value should equal("\"Hello world !\"")
   }
 
   it should "deserialize String" in {
-    read[String, String]("unserialize me").value should equal("unserialize me")
+    read[String]("unserialize me").value should equal("unserialize me")
+    read[String](""""unserialize me"""").value should equal("unserialize me")
   }
 
   it should "serialize Ints" in {
@@ -38,12 +39,12 @@ class SerializerSpec extends FlatSpec with Matchers with Assertions {
   }
 
   it should "deserialize Ints" in {
-    read[Int, String]("0").value should equal(0)
-    read[Int, String]("-113").value should equal(-113)
+    read[Int]("0").value should equal(0)
+    read[Int]("-113").value should equal(-113)
   }
 
   it should "fail for invalid Int read" in {
-    read[Int, String]("50.5").isFailure should be(true)
+    read[Int]("50.5").isFailure should be(true)
   }
 
   it should "serialize Unit" in {
@@ -51,11 +52,11 @@ class SerializerSpec extends FlatSpec with Matchers with Assertions {
   }
 
   it should "deserialize Unit" in {
-    read[Unit, String]("Unit").value should equal(())
+    read[Unit]("Unit").value should equal(())
   }
 
   it should "fail for invalid Unit read" in {
-    read[Unit, String]("void").isFailure should be(true)
+    read[Unit]("void").isFailure should be(true)
   }
 
   it should "serialize Option" in {
@@ -64,14 +65,28 @@ class SerializerSpec extends FlatSpec with Matchers with Assertions {
   }
 
   it should "deserialize Option" in {
-    read[Option[String], String]("Some(string)").value should equal(Option("string"))
-    read[Option[String], String]("Some(true)").value should equal(Option("true"))
-    read[Option[Boolean], String]("Some(true)").value should equal(Option(true))
-    read[Option[String], String]("None").value should equal(None)
+    read[Option[String]]("Some(string)").value should equal(Option("string"))
+    read[Option[String]]("Some(true)").value should equal(Option("true"))
+    read[Option[Boolean]]("Some(true)").value should equal(Option(true))
+    read[Option[String]]("None").value should equal(None)
   }
 
   it should "fail for invalid Option read" in {
-    read[Option[String], String]("Success(ok)").isFailure should be(true)
+    read[Option[String]]("Success(ok)").isFailure should be(true)
+  }
+
+  it should "serialize Either" in {
+    write[Either[String, Int]](Left("error")).value should equal("""Left("error")""")
+    write[Either[String, Int]](Right(12)).value should equal("Right(12)")
+  }
+
+  it should "deserialize Either" in {
+    read[Either[String, Int]]("Left(error)").value should equal(Left("error"))
+    read[Either[String, Int]]("Right(42)").value should equal(Right(42))
+  }
+
+  it should "fail for invalid Either read" in {
+    read[Either[String, String]]("Wrong(15)").isFailure should be(true)
   }
 
   //!TODO EXO1
@@ -82,29 +97,12 @@ class SerializerSpec extends FlatSpec with Matchers with Assertions {
 
   //!TODO EXO1
   it should "deserialize Person" in {
-    read[Person, String]("Person(martin,odersky,None)").value should equal(Person("martin", "odersky", None))
+    read[Person]("Person(martin,odersky,None)").value should equal(Person("martin", "odersky", None))
   }
 
   //!TODO EXO1
   it should "fail for invalid Person read" in {
-    read[Person, String]("Person(hi)").isFailure should be(true)
-  }
-
-  //!TODO EXO2
-  it should "serialize Either" in {
-    write[Either[String, Int], String](Left("error")).value should equal("Left(error)")
-    write[Either[String, Int], String](Right(12)).value should equal("Right(12)")
-  }
-
-  //!TODO EXO2
-  it should "deserialize Either" in {
-    read[Either[String, Int], String]("Left(error)").value should equal(Left("error"))
-    read[Either[String, Int], String]("Right(42)").value should equal(Right(42))
-  }
-
-  //!TODO EXO2
-  it should "fail for invalid Either read" in {
-    read[Either[String, String], String]("Wrong(15)").isFailure should be(true)
+    read[Person]("Person(hi)").isFailure should be(true)
   }
 
   it should "not compile without needed type class" in {
