@@ -4,7 +4,7 @@ package fr.xebia.xke.fp5.exercise1
   * Exercise de motivation pour le typeclass pattern. L'idée est d'implementer une fonctionne qui calcule la moyenne d'une liste
   * d'entiers, en suite d'une liste de double, et en suite d'une liste de numéros complexes
   */
-object Average {
+object OopAverage {
   def avgInt(numbers: Int*): Double = {
     numbers.reduce(_ + _) / numbers.length
   }
@@ -21,7 +21,6 @@ object Average {
     * R: Oui, on peut, en utilisant par example le pattern Wrapper/Adapter
     *
     */
-
   sealed trait Number {
     def +(n: Number): Number
 
@@ -82,7 +81,6 @@ object Average {
   /**
     * Example d'utilisation de avgNumber pour une liste de Int
     */
-
   lazy val avgIntNumber = avgNumber(Number(5), Number(4), Number(3), Number(2), Number(1))
 
   /**
@@ -94,4 +92,58 @@ object Average {
     * Example d'utilisation de avgNumber pour une liste de Int et Double mélangés
     */
   lazy val avgIntDoubleNumber = avgNumber(Number(5.0), Number(4.0), Number(3), Number(2), Number(1))
+}
+
+/**
+  * Exemple de solution en Scala avec l'utilisation de la type class NumberLike
+  */
+object TypeClassAverage {
+  def avgInt(numbers: Int*): Double = {
+    numbers.reduce(_ + _) / numbers.length
+  }
+
+  def avgDouble(numbers: Double*): Double = {
+    numbers.reduce(_ + _) / numbers.length
+  }
+
+  trait NumberLike[T] {
+    def +(a: T, b: T): T
+
+    def /(a: T, n: T): T
+  }
+
+  object NumberLike {
+    implicit object IntNumberLike extends NumberLike[Int] {
+      override def +(a: Int, b: Int): Int = a + b
+
+      override def /(a: Int, n: Int): Int = a / n
+    }
+
+    implicit object DoubleNumberLike extends NumberLike[Double] {
+      override def +(a: Double, b: Double): Double = a + b
+
+      override def /(a: Double, n: Double): Double = a / n
+    }
+  }
+
+  def avgNumber[T](numbers: T*)(implicit numberLike: NumberLike[T], converter: Int => T) = {
+    val sum = numbers.reduce((a, b) => numberLike.+(a, b))
+
+    numberLike./(sum, converter(numbers.size))
+  }
+
+  /**
+    * Example d'utilisation de avgNumber pour une liste de Int
+    */
+  lazy val avgIntNumber = avgNumber(5, 4, 3, 2, 1)
+
+  /**
+    * Example d'utilisation de avgNumber pour une liste de Double
+    */
+  lazy val avgDoubleNumber = avgNumber(5.0, 4.0, 3.0, 2.0, 1.0)
+
+  /**
+    * Example d'utilisation de avgNumber pour une liste de Int et Double mélangés
+    */
+  lazy val avgIntDoubleNumber = avgNumber(5.0, 4.0, 3.0, 2, 1)
 }
