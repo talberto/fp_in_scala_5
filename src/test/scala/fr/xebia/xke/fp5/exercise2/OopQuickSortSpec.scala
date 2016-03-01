@@ -10,4 +10,8 @@ object OopQuickSortSpec extends Properties("OopQuickSort") {
     quickSortInt(numbers: _*) == numbers.sorted
   }
 
+  property("quickSortDouble") = forAll { (numbers: Seq[Double]) =>
+    quickSortDouble(numbers: _*) == numbers.sorted
+  }
+
 }
