@@ -31,9 +31,10 @@ object OopAverage {
     def /(n: NumberAdapter): NumberAdapter
   }
 
-  def avgNumber(numbers: NumberAdapter*): NumberAdapter = ??? /*
-                                                              YOUR CODE HERE
-                                                               */
+  def avgNumber(numbers: NumberAdapter*): NumberAdapter =   /*
+                                                            YOUR CODE HERE
+                                                             */
+    numbers.reduce((a, b) => a + b) / IntNumberAdapter(numbers.length)
 
   /**
     * Example d'utilisation de avgNumber pour une liste de Int
@@ -48,4 +49,43 @@ object OopAverage {
   /*
   YOUR CODE HERE
    */
+  case class IntNumberAdapter(i: Int) extends NumberAdapter {
+    override def +(n: NumberAdapter): NumberAdapter = {
+      n match {
+        case IntNumberAdapter(anotherInt) =>
+          IntNumberAdapter(i + anotherInt)
+        case _ =>
+          throw new scala.IllegalArgumentException(s"The parameter passed $n isn't an instance of IntNumberAdapter")
+      }
+    }
+
+    override def /(n: NumberAdapter): NumberAdapter = {
+      n match {
+        case IntNumberAdapter(anotherInt) =>
+          IntNumberAdapter(i / anotherInt)
+        case _ =>
+          throw new scala.IllegalArgumentException(s"The parameter passed $n isn't an instance of IntNumberAdapter")
+      }
+    }
+  }
+
+  case class DoubleNumberAdapter(d: Double) extends NumberAdapter {
+    override def +(n: NumberAdapter): NumberAdapter = {
+      n match {
+        case DoubleNumberAdapter(anotherDouble) =>
+          DoubleNumberAdapter(d + anotherDouble)
+        case _ =>
+          throw new scala.IllegalArgumentException(s"The parameter passed $n isn't an instance of DoubleNumberAdapter")
+      }
+    }
+
+    override def /(n: NumberAdapter): NumberAdapter = {
+      n match {
+        case DoubleNumberAdapter(anotherDouble) =>
+          DoubleNumberAdapter(d / anotherDouble)
+        case _ =>
+          throw new scala.IllegalArgumentException(s"The parameter passed $n isn't an instance of DoubleNumberAdapter")
+      }
+    }
+  }
 }
