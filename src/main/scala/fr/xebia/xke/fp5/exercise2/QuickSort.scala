@@ -78,6 +78,11 @@ object OopQuickSort {
     */
   case class RationalNumber(numerator: Int, denominator: Int)
 
+  case class RationalNumberOrdered(rationalNumber: RationalNumber) extends Ordered[RationalNumberOrdered] {
+    override def compare(that: RationalNumberOrdered): Int =
+      (rationalNumber.numerator * that.rationalNumber.denominator) - (that.rationalNumber.numerator * rationalNumber.denominator)
+  }
+
   /**
     * Exemple d'usage de quickSortOrdered
     */
@@ -86,4 +91,31 @@ object OopQuickSort {
     RationalNumberOrdered(RationalNumber(2, 1)),
     RationalNumberOrdered(RationalNumber(1, 1))
   )
+}
+
+/**
+  * Exemple de tri façon type class
+  */
+object TypeClassQuickSort {
+
+
+  /**
+    * La type class scala.math.Ordering nous permet de comparer deux t de type T. Jette un coup d'oeil et essaie de comprendre
+    * comment c'est fait.
+    *
+    * La seule méthode a implémenter pour faire un type T une instance de la type class Ordering est def compare(x: T, y: T): Int.
+    * Il existe déjà des implémentations par défaut dans la Scala Standard Library pour le types numériques standard (Int, Double, etc)
+    *
+    * Essaie d'implémenter l'algorithme de tri avec la type class Ordering. Piste: tu peux t'inspirer de l'exemple contenu
+    * dans l'exercice 1
+    */
+  def quickSortOrdering[T](numbers: T*)(implicit ev: Ordering[T]): Seq[T] = ???
+
+  /**
+    * Example d'usage de quickSortOrdering
+    */
+  lazy val sortedIntOrdering = quickSortOrdering(3, 2, 1)
+
+  lazy val sortedDoubleOrdering = quickSortOrdering(3.0, 2.0, 1.0)
+
 }
