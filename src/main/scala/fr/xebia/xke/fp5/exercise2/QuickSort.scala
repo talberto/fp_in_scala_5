@@ -1,5 +1,7 @@
 package fr.xebia.xke.fp5.exercise2
 
+import fr.xebia.xke.fp5.exercise2.OopQuickSort.RationalNumber
+
 object OopQuickSort {
 
   /**
@@ -109,7 +111,14 @@ object TypeClassQuickSort {
     * Essaie d'implémenter l'algorithme de tri avec la type class Ordering. Piste: tu peux t'inspirer de l'exemple contenu
     * dans l'exercice 1
     */
-  def quickSortOrdering[T](numbers: T*)(implicit ev: Ordering[T]): Seq[T] = ???
+  def quickSortOrdering[T](numbers: T*)(implicit ev: Ordering[T]): Seq[T] = numbers match {
+    case Seq() =>
+      Seq()
+    case Seq(pivot, xs @ _*) =>
+      val smallerSorted = quickSortOrdering(xs.filter(x => implicitly[Ordering[T]].lteq(x, pivot)): _*)
+      val biggerSorted = quickSortOrdering(xs.filter(x => implicitly[Ordering[T]].gt(x, pivot)): _*)
+      smallerSorted ++ Seq(pivot) ++ biggerSorted
+  }
 
   /**
     * Example d'usage de quickSortOrdering
@@ -117,5 +126,12 @@ object TypeClassQuickSort {
   lazy val sortedIntOrdering = quickSortOrdering(3, 2, 1)
 
   lazy val sortedDoubleOrdering = quickSortOrdering(3.0, 2.0, 1.0)
+
+  /**
+    * Implémente la type class Ordering pour le type RationalNumber pour que l'algorithme de tri marche avec T=RationalNumber
+    */
+  case class RationalNumber(numerator: Int, denominator: Int)
+
+  lazy val rationalNumberedOrdering = quickSortOrdering(RationalNumber(2, 1), RationalNumber(1, 1))
 
 }
