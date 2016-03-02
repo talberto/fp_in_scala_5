@@ -132,6 +132,24 @@ object TypeClassQuickSort {
     */
   case class RationalNumber(numerator: Int, denominator: Int)
 
+  implicit object RationalNumberOrdering extends Ordering[RationalNumber] {
+    override def compare(x: RationalNumber, y: RationalNumber): Int =
+      (x.numerator * y.denominator) - (y.numerator * x.denominator)
+  }
+
   lazy val rationalNumberedOrdering = quickSortOrdering(RationalNumber(2, 1), RationalNumber(1, 1))
 
+  /**
+    * Pour finir, le type class pattern est tellement utilisé en Scala, qu'il existe même un façon plus idiomatique de
+    * l'écrire. Regarde la version ci-dessous. Elle utilise la notation A: T pour signaler que le type A doit
+    * être une instance de la type class T. C'est juste de la sucre syntactique.
+    */
+  def quickSortOrdering2[T: Ordering](numbers: T*): Seq[T] = numbers match {
+    case Seq() =>
+      Seq()
+    case Seq(pivot, xs @ _*) =>
+      val smallerSorted = quickSortOrdering2(xs.filter(x => implicitly[Ordering[T]].lteq(x, pivot)): _*)
+      val biggerSorted = quickSortOrdering2(xs.filter(x => implicitly[Ordering[T]].gt(x, pivot)): _*)
+      smallerSorted ++ Seq(pivot) ++ biggerSorted
+  }
 }
